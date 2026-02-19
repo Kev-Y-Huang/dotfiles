@@ -15,9 +15,12 @@ config status
 config add .vimrc
 config commit -m "Update vimrc"
 config push
+```
 
 The config alias is defined in .zshrc:
+```bash
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+```
 
 What's Tracked
 
@@ -38,6 +41,7 @@ Sensitive data (API keys, company-specific settings) is stored in .zshrc.local, 
 - Must be created manually on new machines
 
 Example .zshrc.local:
+```bash
 # API Keys
 export MLP_API_KEY="your-api-key"
 
@@ -47,11 +51,12 @@ export GOPRIVATE="*github.rbx.com"
 
 # Custom aliases
 alias proxyemr='autossh -M0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -D 18080 tick'
+```
 
 Installing on a New Machine
 
 Option 1: Fresh Install
-
+```bash
 # Add the alias to your current shell
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 
@@ -77,42 +82,42 @@ nano ~/.zshrc.local
 
 # Restart your shell
 exec zsh
-
+```
 Option 2: Quick Install Script
 
 Save this as a script or run directly:
-
+```bash
 git clone --bare <your-repo-url> $HOME/.cfg
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 mkdir -p .config-backup
 config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} .config-backup/{}
 config checkout
 config config --local status.showUntrackedFiles no
-
+```
 Common Commands
 
 Adding new files
-
+```bash
 config add .bashrc
 config commit -m "Add bashrc"
 config push
-
+```
 Checking status
-
+```bash
 config status
-
+```
 Viewing changes
-
+```bash
 config diff
-
+```
 Pulling updates
-
+```bash
 config pull
-
+```
 Viewing history
-
+```bash
 config log
-
+```
 Advantages of This Approach
 
 1. No symlinks - Files stay in their normal locations
@@ -145,13 +150,14 @@ config add <filename>
 Accidentally tracking sensitive files
 
 Remove them:
+```bash
 config rm --cached <filename>
 config commit -m "Remove sensitive file"
-
+```
 Want to see all files (including untracked)
-
+```bash
 config status -u
-
+```
 References
 
 - https://news.ycombinator.com/item?id=11070797
