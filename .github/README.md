@@ -22,22 +22,54 @@ The config alias is defined in .zshrc:
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 ```
 
+## Multi-Account Git Setup
+
+This dotfiles configuration supports using different Git identities for personal and work projects:
+
+- **Personal repos** (default for all locations): Uses personal GitHub account
+- **Work repos** (`~/repos/` directory): Uses work email and credentials
+
+The setup uses Git's conditional includes to automatically apply the correct configuration based on the repository location.
+
+### Configuration Files
+
+- `.gitconfig` - Main Git config with conditional includes
+- `.gitconfig-personal` - Personal account settings (tracked in dotfiles)
+- `.gitconfig-work` - Work account settings (NOT tracked, must be configured manually)
+
+### Work Repository Directory
+
+All work-related repositories should be cloned into `~/repos/` to automatically use your work Git identity.
+
 What's Tracked
 
 - .zshrc - Zsh configuration (sanitized, no sensitive data)
 - .p10k.zsh - Powerlevel10k theme configuration
-- .gitconfig - Git configuration with aliases
+- .gitconfig - Git configuration with conditional includes
+- .gitconfig-personal - Personal Git account settings
 - .vimrc - Vim editor configuration
 - .condarc - Conda package manager configuration
 - .iterm2_shell_integration.zsh - iTerm2 shell integration
 - .config/gh/ - GitHub CLI configuration
 - .gitignore - Ignores .cfg directory and other files
 
+What's NOT Tracked (Sensitive)
+
+- .gitconfig-work - Work Git credentials (must be created manually)
+- .zshrc.local - Local environment variables and secrets
+
 Sensitive Data
 
-Sensitive data (API keys, company-specific settings) is stored in .zshrc.local, which is:
+Sensitive data (API keys, company-specific settings, work credentials) is kept out of the tracked dotfiles:
+
+**`.zshrc.local`** - Local environment variables and secrets:
 - NOT tracked by git (add to .gitignore if needed)
 - Sourced at the end of .zshrc
+- Must be created manually on new machines
+
+**`.gitconfig-work`** - Work Git credentials:
+- NOT tracked by git (listed in .gitignore)
+- Automatically used for repos in `~/repos/`
 - Must be created manually on new machines
 
 Example .zshrc.local:
@@ -53,7 +85,16 @@ export GOPRIVATE="*github.rbx.com"
 alias proxyemr='autossh -M0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -D 18080 tick'
 ```
 
-Installing on a New Machine
+Example .gitconfig-work:
+```
+[user]
+	name = Your Name
+	email = your-work-email@company.com
+[credential]
+	username = your-work-github-username
+```
+
+## Installing on a New Machine
 
 Option 1: Fresh Install
 ```bash
@@ -76,6 +117,15 @@ config checkout
 
 # Hide untracked files
 config config --local status.showUntrackedFiles no
+
+# Create .gitconfig-work with your work credentials
+nano ~/.gitconfig-work
+# Add the following content:
+# [user]
+#     name = Your Name
+#     email = your-work-email@company.com
+# [credential]
+#     username = your-work-github-username
 
 # Create .zshrc.local with your sensitive data
 nano ~/.zshrc.local
@@ -132,8 +182,10 @@ Important Notes
 - Always use config command, not git, when managing dotfiles
 - Untracked files are hidden by default (showUntrackedFiles=no)
 - Add files explicitly - they won't show up in config status until tracked
-- Keep .zshrc.local separate and never commit it
+- Keep .zshrc.local and .gitconfig-work separate and never commit them
 - SSH config, credentials, and other sensitive files should NOT be tracked
+- Clone all work repositories into `~/repos/` to automatically use work Git identity
+- Personal projects outside `~/repos/` will use your personal Git identity
 
 Troubleshooting
 
@@ -158,7 +210,18 @@ Want to see all files (including untracked)
 ```bash
 config status -u
 ```
-References
+
+Check which Git identity is being used
+
+To verify which email/username will be used in the current directory:
+```bash
+git config user.email
+git config user.name
+```
+
+For work repos in `~/repos/`, this should show your work email. Elsewhere, it should show your personal email.
+
+## References
 
 - https://news.ycombinator.com/item?id=11070797
 - https://www.atlassian.com/git/tutorials/dotfiles

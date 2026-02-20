@@ -3,9 +3,14 @@
 	helper = /usr/local/share/gcm-core/git-credential-manager
 [credential "https://dev.azure.com"]
 	useHttpPath = true
-[user]
-	name = Kevin Huang
-	email = kevinhuang@roblox.com
+
+# Personal repos - use personal email (default for everything)
+[includeIf "gitdir:~/"]
+	path = ~/.gitconfig-personal
+
+# Work repos - use work email and credentials (overrides personal for ~/repos/)
+[includeIf "gitdir:~/repos/"]
+	path = ~/.gitconfig-work
 [alias]
 	rename = branch -m
 	done = "!f() { git checkout ${1:-master} && git branch -D @{-1} && git pull; }; f"
